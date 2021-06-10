@@ -1,5 +1,7 @@
 import paho.mqtt.client as mqtt
 import time
+import datetime
+from datetime import timezone
 import os
 import busio
 import digitalio
@@ -40,7 +42,6 @@ def getMoisture():
     moisture = None
     while moisture is None:
         try:
-            #moisture = "{:.1f}".format((chan0.value/65535)*100)
             moisture = int((chan0.value / 65535) * 100)
         except:
             print ("Error - Moisture")
@@ -79,15 +80,15 @@ client.loop_start()
 
 while 1:
     #Warte auf volle Minute
-    print ("wait")
-    while (int(time.strftime('%S',time.localtime()))) != 0:
+    print ("Wait...")
+    while (int(time.strftime('%S',time.localtime())))%15 != 0:
         time.sleep(0.5)
-    timestamp = time.strftime('%y:%m:%dT%H:%M:%SZ', time.localtime())
+    timestamp = datetime.datetime.now(tz=timezone.utc).isoformat('T')
     publish(device, timestamp, "CPU_Temperature", getCPUtemperature())
     publish(device, timestamp, "Temperature", getTemperature())
     publish(device, timestamp, "Humidity", getHumidity())
     publish(device, timestamp, "Moisture", getMoisture())
 #    publish(device, timestamp, "Movement", getMovement())
-    print ("Wait 50s")
-    time.sleep(50)
+    print ("Wait 150s")
+    time.sleep(11)
 client.loop_stop()
